@@ -8,17 +8,19 @@ const Locations = () => {
   const navigate = useNavigate()
 
   const [locations, setLocations] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const fetchLocations = async () => {
     try {
       const { data } = await axios.get('/api/home/locations')
-        console.log(data)
-      if (data.success) {
-        setLocations(data.locations)
-      }
 
+      if (data.success) {
+        setLocations(data.locations || [])
+      }
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -33,19 +35,23 @@ const Locations = () => {
         Select Your Location
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {loading ? (
+        <p>Loading locations...</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        {locations.map((city, index) => (
-          <div
-            key={index}
-            onClick={() => navigate(`/Vechicals?location=${city}`)}
-            className="cursor-pointer bg-white shadow-md hover:shadow-xl transition-all p-8 rounded-xl text-center font-semibold text-lg"
-          >
-            {city}
-          </div>
-        ))}
+          {locations.map((city) => (
+            <div
+              key={city}
+              onClick={() => navigate(`/Vechicals?location=${city}`)}
+              className="cursor-pointer bg-white shadow-md hover:shadow-xl transition-all p-8 rounded-xl text-center font-semibold text-lg"
+            >
+              {city}
+            </div>
+          ))}
 
-      </div>
+        </div>
+      )}
 
     </div>
   )

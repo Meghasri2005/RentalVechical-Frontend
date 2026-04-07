@@ -1,127 +1,183 @@
-import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import Loader from '../componets/Loader'
-import {useAppContext} from '../Context/AppContext'
-import {toast} from 'react-hot-toast'
+import { useAppContext } from '../Context/AppContext'
+import { toast } from 'react-hot-toast'
 
 const VechicalDetails = () => {
 
-  const {id}=useParams()
+  const { id } = useParams()
+  const navigate = useNavigate()
 
-  const {vechs,axios,pickupDateTime,setPickupDateTime,returnDateTime,setReturnDateTime,user,setShowLogin}=useAppContext()
-  const navigate=useNavigate();
-  const [vech,setVech]=useState(null);
-  useEffect(()=>{
-    fetch(`/api/home/vechicals/${id}`)
-      setVech(vechs.find(vech=>vech._id===id));
+  const {
+    axios,
+    pickupDateTime,
+    setPickupDateTime,
+    returnDateTime,
+    setReturnDateTime,
+    user,
+    setShowLogin
+  } = useAppContext()
 
-  },[vechs,id])
+  const [vech, setVech] = useState(null)
 
-  const handleSubmit=async (e)=>{
-    e.preventDefault();
-    if (!user) {
-    toast.error("Please login first to book a vehicle");
-    navigate("/")
-    setShowLogin(true);
-    return;
+  // ✅ Fetch single vehicle from backend
+  useEffect(() => {
+    const fetchVech = async () => {
+      try {
+        const { data } = await axios.get(`/api/home/vechicals/${id}`)
+        if (data.success) {
+          setVech(data.vechical)
+        } else {
+          toast.error(data.message)
+        }
+      } catch (err) {
+        toast.error(err.message)
+      }
     }
-    try{
-      const {data}=await axios.post('/api/Booking/create',{
-        vech:id,
+
+    fetchVech()
+  }, [id])
+
+  // ✅ Booking handler
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!user) {
+      toast.error("Please login first to book a vehicle")
+      setShowLogin(true)
+      navigate("/")
+      return
+    }
+
+    try {
+      const { data } = await axios.post('/api/Booking/create', {
+        vech: id,
         pickupDateTime,
         returnDateTime
       })
 
-      if(data.success)
-      {
-          toast.success(data.message);
-          navigate('/bookings')
+      if (data.success) {
+        toast.success(data.message)
+        navigate('/bookings')
+      } else {
+        toast.error(data.message)
       }
-      else{
-         toast.error(data.message);
-      }
-
+    } catch (err) {
+      toast.error(err.message)
     }
-    catch(err)
-    {
-      toast.error(err.message);
-    }
-
   }
-  return vech ? (
-        (
-    <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-300' >
-      <div className='flex my-6 gap-2' onClick={()=>navigate(-1)}><img src={assets.arrow_icon} className="rotate-180 opacity-65" />Back to all cars</div>
-      <div className='flex gap-6'>
-        <div className='lg:col-span-2  w-full'>
-          <img src={vech.image} className='w-[600px] h-[400px] rounded-md object-contain' />
-          <div className='space-y-6'> 
-              <div >
-                <h1 className='text-3xl font-bold'>{vech.brand} {vech.model}</h1>
-                <p>{vech.category} * {vech.year}</p>
-            </div>
-            <hr className="border-borderColor my-6 "/>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4"> {[
-              {icon:assets.users_icon, label:`${vech.seatingCapacity} Seats`},
-              {icon:assets.fuel_icon, label:vech.FuelType},
-              {icon:assets.car_icon, label:vech.transmission},
-              {icon:assets.location_icon, label:vech.location}
-            ].map(({icon,label})=><div key={label} className="flex items-center gap-2">
-              <img src={icon} className="w-6 h-6"/>
-              <p>{label}</p>
-            </div>)}</div>
 
-            {/* description */}
+  // ✅ Loader
+  if (!vech) return <Loader />
+
+  return (
+    <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-20'>
+
+      {/* Back button */}
+      <div className='flex my-6 gap-2 cursor-pointer' onClick={() => navigate(-1)}>
+        <img src={assets.arrow_icon} alt="back" className="rotate-180 opacity-65" />
+        Back to all cars
+      </div>
+
+      <div className='flex flex-col lg:flex-row gap-6'>
+
+        {/* Left Section */}
+        <div className='w-full'>
+          <img src={vech.image} alt="vehicle" className='w-full max-w-[600px] h-[400px] rounded-md object-contain' />
+
+          <div className='space-y-6 mt-4'>
+
+            <div>
+              <h1 className='text-3xl font-bold'>{vech.brand} {vech.model}</h1>
+              <p>{vech.category} • {vech.year}</p>
+            </div>
+
+            <hr />
+
+            {/* Info */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { icon: assets.users_icon, label: `${vech.seatingCapacity} Seats` },
+                { icon: assets.fuel_icon, label: vech.FuelType },
+                { icon: assets.car_icon, label: vech.transmission },
+                { icon: assets.location_icon, label: vech.location }
+              ].map(({ icon, label }) => (
+                <div key={label} className="flex items-center gap-2">
+                  <img src={icon} alt="icon" className="w-6 h-6" />
+                  <p>{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Description */}
             <div>
               <h1 className='text-xl font-medium mb-3'>Description</h1>
               <p className='text-gray-500'>{vech.description}</p>
             </div>
 
             {/* Features */}
-
             <div>
               <h1 className='text-xl font-medium mb-3'>Features</h1>
-              <ul className='Grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                {
-                  ["360 Camera ","Bluetooth","GPS","Heated Seats","Raar view mirror"].map((item)=>
-                    <li key={item} className="flex items-center text-gray-500">
-                      <img src={assets.check_icon} className="w-4 h-4 mr-2"/>{item}
-                    </li>
-                  )
-                }
+              <ul className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+                {["360 Camera", "Bluetooth", "GPS", "Heated Seats", "Rear view mirror"].map((item) => (
+                  <li key={item} className="flex items-center text-gray-500">
+                    <img src={assets.check_icon} alt="check" className="w-4 h-4 mr-2" />
+                    {item}
+                  </li>
+                ))}
               </ul>
             </div>
+
           </div>
         </div>
-        
-          <form  onSubmit={handleSubmit} autoComplete="off" className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-5 text-gray-500 w-[400px]'>
-            <div className='flex items-center justify-between text-2xl text-gray-800 font-semibold'><h2>${vech.pricePerDay}</h2><span className='text-base text-gray-400 font-normal'>per day</span></div>
-            <hr className='border-borderColor my-6'/>
-            <div className='flex flex-col gap-2'>
-              <label htmlFor='pickup-date'>Pickup Date and Time</label>
-              <input type="datetime-local" autoComplete="new-date"
-                value={pickupDateTime} onChange={e=>setPickupDateTime(e.target.value)}
-              className='border border-borderColor px-3 py-2 rounded-lg'required id='pickup-date' min={new Date().toISOString().split('T')[0]}/>
-            </div>
 
-            <div className='flex flex-col gap-2'>
-              <label htmlFor='return-date'>Return Date and Time</label>
-              <input type="datetime-local" autoComplete="new-date" value={returnDateTime} onChange={e=>setReturnDateTime(e.target.value)}
-              className='border border-borderColor px-3 py-2 rounded-lg'required id='return-date' min={new Date().toISOString().split('T')[0]}/>
-            </div>
+        {/* Right Section (Booking) */}
+        <form
+          onSubmit={handleSubmit}
+          className='shadow-lg h-max sticky top-20 rounded-xl p-6 space-y-5 text-gray-500 w-full max-w-[400px]'
+        >
 
-            <button className='w-full bg-[#2563EB] px-6   hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer '>Book Now</button>
+          <div className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
+            <h2>₹{vech.pricePerDay}</h2>
+            <span className='text-base text-gray-400 font-normal'>per day</span>
+          </div>
 
-            <p className='text-center text-sm'>No credit card required to reserve</p>
-          </form>
-        
+          <hr />
+
+          <div className='flex flex-col gap-2'>
+            <label>Pickup Date and Time</label>
+            <input
+              type="datetime-local"
+              value={pickupDateTime}
+              onChange={e => setPickupDateTime(e.target.value)}
+              className='border px-3 py-2 rounded-lg'
+              required
+            />
+          </div>
+
+          <div className='flex flex-col gap-2'>
+            <label>Return Date and Time</label>
+            <input
+              type="datetime-local"
+              value={returnDateTime}
+              onChange={e => setReturnDateTime(e.target.value)}
+              className='border px-3 py-2 rounded-lg'
+              required
+            />
+          </div>
+
+          <button className='w-full bg-[#2563EB] hover:bg-blue-700 transition py-3 text-white rounded-xl'>
+            Book Now
+          </button>
+
+          <p className='text-center text-sm'>No credit card required</p>
+
+        </form>
       </div>
     </div>
   )
-  ):<Loader/>
 }
 
-export default  VechicalDetails
+export default VechicalDetails
