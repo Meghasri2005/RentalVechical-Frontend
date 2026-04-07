@@ -4,7 +4,7 @@ import toast  from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {useEffect} from 'react'
   
-axios.defaults.baseURL="https://rentalvechical-1.onrender.com/";
+axios.defaults.baseURL = "https://rental-vechical-backend.vercel.app";
 
 export const AppContext =createContext();
 
@@ -59,7 +59,7 @@ export const AppProvider=({children})=>{
     // function to fetch all cars form db
     const fetchVechs=async()=>{
         try{
-            const {data}=await axios.get('api/home/vechicals')
+            const {data}=await axios.get('/api/home/vechicals')
             if(data.success)
             {
                 setVechs(data.vechicals)
@@ -80,7 +80,7 @@ export const AppProvider=({children})=>{
         setToken(null)
         setUser(null)
         setIsOwner(false)
-        axios.defaults.headers.common['Authorization']=`Bearer ${token}`
+        delete axios.defaults.headers.common['Authorization'];
         toast.success('you have been loged out')
     }
 

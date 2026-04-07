@@ -1,6 +1,6 @@
-import React from 'react'
+
 import Navbar from './componets/Navbar'
-import { useState } from 'react'
+
 import { Routes, Route , useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Vechicals from './pages/Vechicals';
