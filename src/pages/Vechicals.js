@@ -10,22 +10,24 @@ const Vechicals = () => {
 
   const [searchParams] = useSearchParams()
 
+  // URL search params
   const pickupLocation = searchParams.get('pickupLocation')
   const pickupDateTime = searchParams.get('pickupDateTime')
   const returnDateTime = searchParams.get('returnDateTime')
   const type = searchParams.get("type")
   const location = searchParams.get("location")
 
+  const { vechs, axios } = useAppContext()
+
   const [input, setInput] = useState("")
   const [filteredVechs, setFilteredVechs] = useState([])
-
-  const { vechs, axios } = useAppContext()
+  const [loading, setLoading] = useState(true)
 
   const isSearchData = pickupLocation && pickupDateTime && returnDateTime
 
-  // 🔍 Filter function
-  const applyFilter = (data) => {
-    let filtered = [...data]
+  // 🔍 FILTER FUNCTION (LOCAL FILTER)
+  const applyFilter = (vehiclesList) => {
+    let filtered = [...vehiclesList]
 
     if (type) {
       filtered = filtered.filter(v => v.vechicalType === type)
@@ -47,11 +49,14 @@ const Vechicals = () => {
     }
 
     setFilteredVechs(filtered)
+    setLoading(false)
   }
 
-  // 🚀 Fetch available vehicles (API search)
+  // 🚀 SEARCH AVAILABLE VEHICLES FROM BACKEND
   const searchVechAvailability = async () => {
     try {
+      setLoading(true)
+
       const { data } = await axios.post('/api/home/available', {
         location: pickupLocation,
         pickupDateTime,
@@ -60,30 +65,44 @@ const Vechicals = () => {
 
       if (data.success) {
         if (data.availableVechs.length === 0) {
-          toast("No vehicles available")
+          toast("No vehicles available for selected time")
         }
-        applyFilter(data.availableVechs) // 🔥 Apply filters AFTER API
+        applyFilter(data.availableVechs)
       }
+
     } catch (err) {
-      toast.error(err.message)
+      toast.error("Failed to fetch available vehicles")
+      setLoading(false)
     }
   }
 
-  // 🧠 Main logic controller
+  // 🟢 RUN WHEN SEARCH PARAMS EXIST (date search)
   useEffect(() => {
     if (isSearchData) {
       searchVechAvailability()
-    } else {
+    }
+  }, [pickupLocation, pickupDateTime, returnDateTime])
+
+  // 🟢 RUN WHEN ALL VEHICLES LOAD FROM CONTEXT
+  useEffect(() => {
+    if (!isSearchData && vechs.length > 0) {
       applyFilter(vechs)
     }
-  }, [vechs, input, type, location, pickupLocation, pickupDateTime, returnDateTime])
+  }, [vechs])
+
+  // 🟢 RUN WHEN USER TYPES / FILTERS CHANGE
+  useEffect(() => {
+    if (!isSearchData) {
+      applyFilter(vechs)
+    }
+  }, [input, type, location])
 
   return (
     <>
-      {/* 🔍 Search UI */}
+      {/* 🔍 SEARCH BAR */}
       <div className='flex flex-col items-center py-20 bg-[#F1F5F9] max-md:px-4'>
         <Title 
-          title="Available Vechs" 
+          title="Available Vehicles" 
           subtitle="Browse our selection of premium vehicles for your next adventure" 
         />
 
@@ -93,7 +112,7 @@ const Vechicals = () => {
           <input
             type='text'
             value={input}
-            placeholder='Search by make, model or feature'
+            placeholder='Search by brand, model or feature'
             className='w-full h-full text-gray-500 outline-none'
             onChange={(e) => setInput(e.target.value)}
           />
@@ -102,18 +121,24 @@ const Vechicals = () => {
         </div>
       </div>
 
-      {/* 🚗 Vehicles */}
+      {/* 🚗 VEHICLES LIST */}
       <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-10'>
 
-        <p className='text-gray-500 xl:px-20 max-w-7xl mx-auto'>
-          {filteredVechs.length} vehicles available
-        </p>
+        {loading ? (
+          <p className='text-center text-gray-500'>Loading vehicles...</p>
+        ) : (
+          <>
+            <p className='text-gray-500 xl:px-20 max-w-7xl mx-auto'>
+              {filteredVechs.length} vehicles available
+            </p>
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto'>
-          {filteredVechs.map((vech) => (
-            <VechCard key={vech._id} vech={vech} />
-          ))}
-        </div>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto'>
+              {filteredVechs.map((vech) => (
+                <VechCard key={vech._id} vech={vech} />
+              ))}
+            </div>
+          </>
+        )}
 
       </div>
     </>
