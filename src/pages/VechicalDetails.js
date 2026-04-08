@@ -26,7 +26,7 @@ const VechicalDetails = () => {
   useEffect(() => {
     const fetchVech = async () => {
       try {
-        const { data } = await axios.get(`/api/home/vechicals/${id}`)
+        const { data } = await axios.get(`/api/home/${id}`)
         if (data.success) {
           setVech(data.vechical)
         } else {
