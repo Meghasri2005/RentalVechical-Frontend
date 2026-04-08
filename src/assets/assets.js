@@ -52,11 +52,12 @@ import ScootyBike from "./ScootyBike.png"
 import Minicar from "./miniCar.png"
 import MotorBike from "./motorbike.png"
 import AutoRickshaw from "./AutoRickshaw.png"
-
+import VechTake from "./VechTake.png"
 
 export const cityList = ['New York', 'Los Angeles', 'Houston', 'Chicago']
 
 export const assets = {
+    VechTake,
     Location,
     ScootyBike,
     Minicar,

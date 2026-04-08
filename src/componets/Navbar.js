@@ -40,7 +40,7 @@ const Navbar = () => {
   return (
     <div className={` flex  relative  ${location.pathname==="/"?"bg-[#F1F5F9]":"bg-white"} items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 text-gray-600 border-b border-[#c4c7d2] relative transition-all duration-300`}>
       <Link to="/">
-      <img src={assets.logo} alt="logo" className='logo h-8' /></Link>
+      <img src={assets.VechTake} alt="logo" className='logo h-8' /></Link>
         <div className={`flex flex-col  max-sm:fixed max-sm:h-screen max-sm:w-full max-sm:top-16 max-sm:border-t border-borderColor right-0 sm:flex-row items-start sm:items-center gap-4 sm:gap-8 max-sm:p-4 transition-all duration-300 z-50 ${location.pathname==="/"?"bg-[#F1F5F9]":"bg-white"} ${open?"max-sm:translate-x-0":"max-sm:translate-x-full"}`}>
             <Link to="/">Home</Link>
             <Link to="/Vechicals">Vechicals</Link>
