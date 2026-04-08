@@ -4,7 +4,7 @@ import toast  from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {useEffect} from 'react'
   
-axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = "https://rental-vechical-backend.vercel.app";
 
 export const AppContext =createContext();
 
