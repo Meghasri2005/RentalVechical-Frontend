@@ -6,7 +6,7 @@ const VechCard = ({vech}) => {
   const navigate=useNavigate();
   return (
     <div className='group rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-500 cursor-pointer' onClick={()=>{
-      navigate(`/vechical/${vech._id}`);
+      navigate(`/Vechical/${vech._id}`);
     }}>
       <div className='relative h-48 overflow-hidden'>
         <img src={vech.image} alt={vech.name} className='w-full h-48 object-contain group-hover:scale-105 transition-transform  duration-500' />

@@ -28,7 +28,7 @@ const VechicalDetails = () => {
       try {
         const { data } = await axios.get(`/api/home/${id}`)
         if (data.success) {
-          setVech(data.vechical)
+          setVech(data.Vech || data.vechical)
         } else {
           toast.error(data.message)
         }
